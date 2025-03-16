@@ -45,7 +45,9 @@ struct Request: AsyncParsableCommand {
   var policyFile: String
 
   mutating func run() async throws {
-    print("TODO: implement request for \(client)")
+    let data = try Data(contentsOf: URL(fileURLWithPath: policyFile))
+    let policy = try JSONDecoder().decode(Policy.self, from: data)
+    try await policy.request()
   }
 }
 
