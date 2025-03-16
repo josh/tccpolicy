@@ -8,7 +8,7 @@ extension Policy {
     var stderr = StandardErrorStream()
 
     if self.calendar == true {
-      if try await EKEventStore().requestFullAccessToEvents() == false {
+      if try await EKEventStore()._requestFullAccessToEvents() == false {
         print("warn: Calendar access denied", to: &stderr)
       }
     }
@@ -32,7 +32,7 @@ extension Policy {
     }
 
     if self.reminders == true {
-      if try await EKEventStore().requestFullAccessToReminders() == false {
+      if try await EKEventStore()._requestFullAccessToReminders() == false {
         print("warn: Reminders access denied", to: &stderr)
       }
     }
@@ -64,6 +64,40 @@ extension PHPhotoLibrary {
     await withCheckedContinuation { continuation in
       requestAuthorization { status in
         continuation.resume(returning: status == .authorized)
+      }
+    }
+  }
+}
+
+extension EKEventStore {
+  func _requestFullAccessToEvents() async throws -> Bool {
+    if #available(macOS 14.0, *) {
+      return try await self.requestFullAccessToEvents()
+    } else {
+      return try await withCheckedThrowingContinuation { continuation in
+        self.requestAccess(to: .event) { granted, error in
+          if let error {
+            continuation.resume(throwing: error)
+          } else {
+            continuation.resume(returning: granted)
+          }
+        }
+      }
+    }
+  }
+
+  func _requestFullAccessToReminders() async throws -> Bool {
+    if #available(macOS 14.0, *) {
+      return try await self.requestFullAccessToReminders()
+    } else {
+      return try await withCheckedThrowingContinuation { continuation in
+        self.requestAccess(to: .reminder) { granted, error in
+          if let error {
+            continuation.resume(throwing: error)
+          } else {
+            continuation.resume(returning: granted)
+          }
+        }
       }
     }
   }
