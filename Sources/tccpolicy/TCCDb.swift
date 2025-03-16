@@ -141,10 +141,45 @@ actor TCCDb {
     return sqlite3_column_int64(statement, 0)
   }
 
-  func hasAccess(client: String, service: String, identifier: String? = nil) throws -> Bool {
+  enum AuthValue: Int64 {
+    case denied = 0
+    case unknown = 1
+    case allowed = 2
+    case addOnly = 4
+  }
+
+  func authValue(client: String, service: String, identifierPrefix: String? = nil) throws
+    -> AuthValue?
+  {
+    let sql: String
+
+    if let identifierPrefix {
+      sql = """
+          SELECT auth_value FROM access WHERE client = '\(client)' AND service = '\(service)' AND indirect_object_identifier LIKE '\(identifierPrefix)%';
+        """
+    } else {
+      sql = """
+          SELECT auth_value FROM access WHERE client = '\(client)' AND service = '\(service)';
+        """
+    }
+
+    let rows = query(sql: sql)
+    guard let row = rows.first else {
+      return nil
+    }
+
+    guard let authValue = row["auth_value"] as? Int64 else {
+      assertionFailure("Could not cast auth_value to Int64")
+      return nil
+    }
+
+    return AuthValue(rawValue: authValue)
+  }
+
+  func identifiers(client: String, service: String) throws -> [String] {
     let sql = """
-        SELECT COUNT(*) FROM access WHERE client = '\(client)' AND service = '\(service)' AND auth_value = 2;
+        SELECT indirect_object_identifier FROM access WHERE client = '\(client)' AND service = '\(service)';
       """
-    return count(sql: sql) > 0
+    return query(sql: sql).map { $0["indirect_object_identifier"] as? String ?? "" }
   }
 }
