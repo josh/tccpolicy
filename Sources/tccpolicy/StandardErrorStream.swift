@@ -7,5 +7,3 @@ struct StandardErrorStream: TextOutputStream {
     }
   }
 }
-
-var stderr = StandardErrorStream()
