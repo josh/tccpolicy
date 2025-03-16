@@ -141,6 +141,10 @@ actor TCCDb {
     return sqlite3_column_int64(statement, 0)
   }
 
+  func clients() throws -> [String] {
+    return query(sql: "SELECT DISTINCT client FROM access").map { $0["client"] as? String ?? "" }
+  }
+
   enum AuthValue: Int64 {
     case denied = 0
     case unknown = 1

@@ -14,17 +14,21 @@ struct Dump: AsyncParsableCommand {
   static let configuration = CommandConfiguration(abstract: "Dump policy for given client")
 
   @Option(help: "Bundle identifier or executable path")
-  var client: String
+  var client: String?
 
   @Option(name: [.short, .customLong("output")])
   var outputFile: String?
 
   mutating func run() async throws {
-    let policy = try await Policy.dump(client: client)
-
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted]
-    let data = try encoder.encode(policy)
+    let data: Data
+
+    if let client {
+      data = try await encoder.encode(Policy.dump(client: client))
+    } else {
+      data = try await encoder.encode(Policy.dump())
+    }
 
     if let outputFile = outputFile {
       try data.write(to: URL(fileURLWithPath: outputFile))

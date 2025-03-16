@@ -26,4 +26,12 @@ struct Policy: Codable {
     case systemPolicyiCloudDrive = "SystemPolicyiCloudDrive"
     case systemPolicyNetworkVolumes = "SystemPolicyNetworkVolumes"
   }
+
+  var isEmpty: Bool {
+    return addressBook == nil && appleEvents == nil && calendar == nil && mediaLibrary == nil
+      && photos == nil && reminders == nil && systemPolicyDesktopFolder == nil
+      && systemPolicyDeveloperFiles == nil && systemPolicyDocumentsFolder == nil
+      && systemPolicyDownloadsFolder == nil && systemPolicyiCloudDrive == nil
+      && systemPolicyNetworkVolumes == nil
+  }
 }
