@@ -4,7 +4,13 @@ on: push
 
 jobs:
   build:
-    runs-on: macos-15
+    strategy:
+      matrix:
+        os:
+          - macos-13
+          - macos-15
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
