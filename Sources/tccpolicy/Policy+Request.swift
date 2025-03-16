@@ -71,34 +71,34 @@ extension PHPhotoLibrary {
 
 extension EKEventStore {
   func _requestFullAccessToEvents() async throws -> Bool {
-    if #available(macOS 14.0, *) {
-      return try await self.requestFullAccessToEvents()
-    } else {
-      return try await withCheckedThrowingContinuation { continuation in
-        self.requestAccess(to: .event) { granted, error in
-          if let error {
-            continuation.resume(throwing: error)
-          } else {
-            continuation.resume(returning: granted)
-          }
+    // if #available(macOS 14.0, *) {
+    //   return try await self.requestFullAccessToEvents()
+    // } else {
+    return try await withCheckedThrowingContinuation { continuation in
+      self.requestAccess(to: .event) { granted, error in
+        if let error {
+          continuation.resume(throwing: error)
+        } else {
+          continuation.resume(returning: granted)
         }
       }
     }
+    // }
   }
 
   func _requestFullAccessToReminders() async throws -> Bool {
-    if #available(macOS 14.0, *) {
-      return try await self.requestFullAccessToReminders()
-    } else {
-      return try await withCheckedThrowingContinuation { continuation in
-        self.requestAccess(to: .reminder) { granted, error in
-          if let error {
-            continuation.resume(throwing: error)
-          } else {
-            continuation.resume(returning: granted)
-          }
+    // if #available(macOS 14.0, *) {
+    //   return try await self.requestFullAccessToReminders()
+    // } else {
+    return try await withCheckedThrowingContinuation { continuation in
+      self.requestAccess(to: .reminder) { granted, error in
+        if let error {
+          continuation.resume(throwing: error)
+        } else {
+          continuation.resume(returning: granted)
         }
       }
     }
+    // }
   }
 }
