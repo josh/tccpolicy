@@ -5,6 +5,7 @@ struct Policy: Codable {
   var mediaLibrary: Bool?
   var photos: Bool?
   var reminders: Bool?
+  var systemPolicyAllFiles: Bool?
   var systemPolicyDesktopFolder: Bool?
   var systemPolicyDeveloperFiles: Bool?
   var systemPolicyDocumentsFolder: Bool?
@@ -19,6 +20,7 @@ struct Policy: Codable {
     case mediaLibrary = "MediaLibrary"
     case photos = "Photos"
     case reminders = "Reminders"
+    case systemPolicyAllFiles = "SystemPolicyAllFiles"
     case systemPolicyDesktopFolder = "SystemPolicyDesktopFolder"
     case systemPolicyDeveloperFiles = "SystemPolicyDeveloperFiles"
     case systemPolicyDocumentsFolder = "SystemPolicyDocumentsFolder"
@@ -29,9 +31,9 @@ struct Policy: Codable {
 
   var isEmpty: Bool {
     return addressBook == nil && appleEvents == nil && calendar == nil && mediaLibrary == nil
-      && photos == nil && reminders == nil && systemPolicyDesktopFolder == nil
-      && systemPolicyDeveloperFiles == nil && systemPolicyDocumentsFolder == nil
-      && systemPolicyDownloadsFolder == nil && systemPolicyiCloudDrive == nil
-      && systemPolicyNetworkVolumes == nil
+      && photos == nil && reminders == nil && systemPolicyAllFiles == nil
+      && systemPolicyDesktopFolder == nil && systemPolicyDeveloperFiles == nil
+      && systemPolicyDocumentsFolder == nil && systemPolicyDownloadsFolder == nil
+      && systemPolicyiCloudDrive == nil && systemPolicyNetworkVolumes == nil
   }
 }

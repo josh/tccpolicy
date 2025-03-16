@@ -152,9 +152,7 @@ actor TCCDb {
     case addOnly = 4
   }
 
-  func authValue(client: String, service: String, identifierPrefix: String? = nil) throws
-    -> AuthValue?
-  {
+  func authValue(client: String, service: String, identifierPrefix: String? = nil) -> AuthValue? {
     let sql: String
 
     if let identifierPrefix {
@@ -180,7 +178,7 @@ actor TCCDb {
     return AuthValue(rawValue: authValue)
   }
 
-  func identifiers(client: String, service: String) throws -> [String] {
+  func identifiers(client: String, service: String) -> [String] {
     let sql = """
         SELECT indirect_object_identifier FROM access WHERE client = '\(client)' AND service = '\(service)';
       """
