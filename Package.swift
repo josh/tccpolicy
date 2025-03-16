@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
   name: "tccpolicy",
   platforms: [
-    .macOS(.v10_15)
+    .macOS(.v15)
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0")
