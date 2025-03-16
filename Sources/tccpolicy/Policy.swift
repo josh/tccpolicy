@@ -30,10 +30,41 @@ struct Policy: Codable {
   }
 
   var isEmpty: Bool {
-    return addressBook == nil && appleEvents == nil && calendar == nil && mediaLibrary == nil
-      && photos == nil && reminders == nil && systemPolicyAllFiles == nil
-      && systemPolicyDesktopFolder == nil && systemPolicyDeveloperFiles == nil
-      && systemPolicyDocumentsFolder == nil && systemPolicyDownloadsFolder == nil
-      && systemPolicyiCloudDrive == nil && systemPolicyNetworkVolumes == nil
+    let mirror = Mirror(reflecting: self)
+    for child in mirror.children {
+      if child.value != nil {
+        return false
+      }
+    }
+    return true
+  }
+
+  func satisfies(_ other: Self) -> Bool {
+    if let selfEvents = self.appleEvents,
+      let otherEvents = other.appleEvents,
+      !Set(selfEvents).isSubset(of: Set(otherEvents))
+    {
+      return false
+    }
+
+    let mirror = Mirror(reflecting: self)
+
+    for child in mirror.children {
+      guard let propertyName = child.label else { continue }
+
+      if propertyName == "appleEvents" { continue }
+
+      guard let value = child.value as? Bool? else { continue }
+      if value == nil { continue }
+
+      let otherMirror = Mirror(reflecting: other)
+      let otherValue = otherMirror.children.first { $0.label == propertyName }?.value as? Bool?
+
+      if value != otherValue {
+        return false
+      }
+    }
+
+    return true
   }
 }
