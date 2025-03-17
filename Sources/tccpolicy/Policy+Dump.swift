@@ -3,7 +3,10 @@ extension Policy {
     try await TCCDb.user.open()
     try await TCCDb.system.open()
 
-    let clients = try await TCCDb.user.clients()
+    let userClients = try await TCCDb.user.clients()
+    let systemClients = try await TCCDb.system.clients()
+    let clients = Set(userClients + systemClients)
+
     var policies: [String: Policy] = [:]
     for client in clients {
       var policy = Policy()
