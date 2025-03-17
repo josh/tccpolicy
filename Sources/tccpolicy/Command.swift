@@ -44,7 +44,7 @@ struct Check: AsyncParsableCommand {
     abstract: "Check client matches policy requirements")
 
   @Option(help: "Bundle identifier or executable path")
-  var client: String
+  var client: String?
 
   @Option(name: [.short, .customLong("policy")])
   var policyFile: String
@@ -61,11 +61,43 @@ struct Check: AsyncParsableCommand {
   }
 
   mutating func run() async throws {
+    var stderr = StandardErrorStream()
+
     let data = try Data(contentsOf: URL(fileURLWithPath: policyFile))
-    let policyA = try JSONDecoder().decode(Policy.self, from: data)
-    let policyB = try await Policy.dump(client: client)
-    if !policyA.satisfies(policyB) {
-      throw Error.checkFailed
+
+    if let client {
+      let requiredPolicy = try JSONDecoder().decode(Policy.self, from: data)
+      let policy = try await Policy.dump(client: client)
+
+      do {
+        try policy.check(requiredPolicy)
+      } catch let error as Policy.CheckError {
+        print("error: \(client): \(error)", to: &stderr)
+        throw Error.checkFailed
+      }
+    } else {
+      let requiredPolicies = try JSONDecoder().decode([String: Policy].self, from: data)
+      let policies = try await Policy.dump()
+      var failed = false
+
+      for (name, requiredPolicy) in requiredPolicies {
+        guard let policy = policies[name] else {
+          print("error: \(name) has no policy", to: &stderr)
+          failed = true
+          continue
+        }
+
+        do {
+          try policy.check(requiredPolicy)
+        } catch let error as Policy.CheckError {
+          print("error: \(name): \(error)", to: &stderr)
+          failed = true
+        }
+      }
+
+      if failed {
+        throw Error.checkFailed
+      }
     }
   }
 }

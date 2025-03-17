@@ -13,7 +13,7 @@ struct Policy: Codable {
   var systemPolicyiCloudDrive: Bool?
   var systemPolicyNetworkVolumes: Bool?
 
-  enum CodingKeys: String, CodingKey {
+  enum CodingKeys: String, CodingKey, CaseIterable {
     case addressBook = "AddressBook"
     case appleEvents = "AppleEvents"
     case calendar = "Calendar"
@@ -27,6 +27,29 @@ struct Policy: Codable {
     case systemPolicyDownloadsFolder = "SystemPolicyDownloadsFolder"
     case systemPolicyiCloudDrive = "SystemPolicyiCloudDrive"
     case systemPolicyNetworkVolumes = "SystemPolicyNetworkVolumes"
+
+    var label: String {
+      switch self {
+      case .addressBook: return "addressBook"
+      case .appleEvents: return "appleEvents"
+      case .calendar: return "calendar"
+      case .mediaLibrary: return "mediaLibrary"
+      case .photos: return "photos"
+      case .reminders: return "reminders"
+      case .systemPolicyAllFiles: return "systemPolicyAllFiles"
+      case .systemPolicyDesktopFolder: return "systemPolicyDesktopFolder"
+      case .systemPolicyDeveloperFiles: return "systemPolicyDeveloperFiles"
+      case .systemPolicyDocumentsFolder: return "systemPolicyDocumentsFolder"
+      case .systemPolicyDownloadsFolder: return "systemPolicyDownloadsFolder"
+      case .systemPolicyiCloudDrive: return "systemPolicyiCloudDrive"
+      case .systemPolicyNetworkVolumes: return "systemPolicyNetworkVolumes"
+      }
+    }
+
+    static let labelMap: [String: CodingKeys] = CodingKeys.allCases.reduce(into: [:]) {
+      (dict, key) in
+      dict[key.label] = key
+    }
   }
 
   var isEmpty: Bool {
@@ -42,32 +65,55 @@ struct Policy: Codable {
     return true
   }
 
-  func satisfies(_ other: Self) -> Bool {
-    if let selfEvents = self.appleEvents,
-      let otherEvents = other.appleEvents,
-      !Set(selfEvents).isSubset(of: Set(otherEvents))
-    {
-      return false
+  enum CheckError: Error, CustomStringConvertible {
+    case accessError([CodingKeys])
+
+    var description: String {
+      switch self {
+      case .accessError(let keys):
+        return "Policy missing access: \(keys.map(\.stringValue).joined(separator: ", "))"
+      }
     }
+  }
 
-    let mirror = Mirror(reflecting: self)
+  func check(_ other: Self) throws {
+    var errors: [CodingKeys] = []
 
-    for child in mirror.children {
-      guard let propertyName = child.label else { continue }
-
-      if propertyName == "appleEvents" { continue }
-
-      guard let value = child.value as? Bool? else { continue }
-      if value == nil { continue }
-
-      let otherMirror = Mirror(reflecting: other)
-      let otherValue = otherMirror.children.first { $0.label == propertyName }?.value as? Bool?
-
-      if value != otherValue {
-        return false
+    if let requiredEvents = other.appleEvents {
+      if let selfEvents = self.appleEvents {
+        if !Set(requiredEvents).isSubset(of: Set(selfEvents)) {
+          errors.append(.appleEvents)
+        }
+      } else {
+        errors.append(.appleEvents)
       }
     }
 
-    return true
+    let selfMirror = Mirror(reflecting: self)
+    let otherMirror = Mirror(reflecting: other)
+
+    for otherChild in otherMirror.children {
+      guard let label = otherChild.label else {
+        fatalError("Unknown label")
+      }
+      guard let codingKey = CodingKeys.labelMap[label] else {
+        fatalError("Unknown label")
+      }
+
+      if codingKey == .appleEvents { continue }
+
+      guard let requiredValue = otherChild.value as? Bool? else { continue }
+      if requiredValue == nil { continue }
+
+      let selfValue = selfMirror.children.first { $0.label == label }?.value as? Bool?
+
+      if requiredValue != selfValue {
+        errors.append(codingKey)
+      }
+    }
+
+    if !errors.isEmpty {
+      throw CheckError.accessError(errors)
+    }
   }
 }
