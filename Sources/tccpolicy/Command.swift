@@ -92,7 +92,10 @@ struct Reset: AsyncParsableCommand {
   @Option(help: "Bundle identifier or executable path")
   var client: String
 
+  @Option(name: [.short, .customLong("service")])
+  var service: String?
+
   mutating func run() async throws {
-    print("TODO: implement reset for \(client)")
+    try await Policy.reset(client: client, service: service)
   }
 }
