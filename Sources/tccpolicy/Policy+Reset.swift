@@ -5,7 +5,8 @@ extension Policy {
     let rowsChanged = try await TCCDb.user.reset(client: client, service: service)
     if rowsChanged == 0 {
       if let service {
-        print("warn: No access entries found for client \(client) and service \(service)", to: &stderr)
+        print(
+          "warn: No access entries found for client \(client) and service \(service)", to: &stderr)
       } else {
         print("warn: No access entries found for client \(client)", to: &stderr)
       }
