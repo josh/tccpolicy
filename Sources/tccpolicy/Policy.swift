@@ -32,7 +32,10 @@ struct Policy: Codable {
   var isEmpty: Bool {
     let mirror = Mirror(reflecting: self)
     for child in mirror.children {
-      if child.value != nil {
+      let isNil =
+        Mirror(reflecting: child.value).displayStyle == .optional
+        && Mirror(reflecting: child.value).children.isEmpty
+      if !isNil {
         return false
       }
     }
