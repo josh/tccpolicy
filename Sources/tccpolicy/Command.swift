@@ -125,9 +125,16 @@ struct Reset: AsyncParsableCommand {
   var client: String
 
   @Option(name: [.short, .customLong("service")])
-  var service: String?
+  var service: Service?
 
   mutating func run() async throws {
     try await Policy.reset(client: client, service: service)
+  }
+}
+
+extension Service: ExpressibleByArgument {
+  init?(argument: String) {
+    guard let service = Service(rawValue: argument) else { return nil }
+    self = service
   }
 }

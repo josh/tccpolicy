@@ -27,48 +27,14 @@ struct Policy: Codable {
     case systemPolicyDownloadsFolder = "SystemPolicyDownloadsFolder"
     case systemPolicyiCloudDrive = "SystemPolicyiCloudDrive"
     case systemPolicyNetworkVolumes = "SystemPolicyNetworkVolumes"
-
-    var label: String {
-      switch self {
-      case .addressBook: return "addressBook"
-      case .appleEvents: return "appleEvents"
-      case .calendar: return "calendar"
-      case .mediaLibrary: return "mediaLibrary"
-      case .photos: return "photos"
-      case .reminders: return "reminders"
-      case .systemPolicyAllFiles: return "systemPolicyAllFiles"
-      case .systemPolicyDesktopFolder: return "systemPolicyDesktopFolder"
-      case .systemPolicyDeveloperFiles: return "systemPolicyDeveloperFiles"
-      case .systemPolicyDocumentsFolder: return "systemPolicyDocumentsFolder"
-      case .systemPolicyDownloadsFolder: return "systemPolicyDownloadsFolder"
-      case .systemPolicyiCloudDrive: return "systemPolicyiCloudDrive"
-      case .systemPolicyNetworkVolumes: return "systemPolicyNetworkVolumes"
-      }
-    }
-
-    static let labelMap: [String: CodingKeys] = CodingKeys.allCases.reduce(into: [:]) {
-      (dict, key) in
-      dict[key.label] = key
-    }
-
-    init?(label: String) {
-      let key = CodingKeys.labelMap[label]
-      guard let key else { return nil }
-      self = key
-    }
   }
 
   var isEmpty: Bool {
-    let mirror = Mirror(reflecting: self)
-    for child in mirror.children {
-      let isNil =
-        Mirror(reflecting: child.value).displayStyle == .optional
-        && Mirror(reflecting: child.value).children.isEmpty
-      if !isNil {
-        return false
-      }
-    }
-    return true
+    return addressBook == nil && appleEvents == nil && calendar == nil && mediaLibrary == nil
+      && photos == nil && reminders == nil && systemPolicyAllFiles == nil
+      && systemPolicyDesktopFolder == nil && systemPolicyDeveloperFiles == nil
+      && systemPolicyDocumentsFolder == nil && systemPolicyDownloadsFolder == nil
+      && systemPolicyNetworkVolumes == nil
   }
 
   enum CheckError: Error, CustomStringConvertible {
@@ -77,7 +43,7 @@ struct Policy: Codable {
     var description: String {
       switch self {
       case .accessError(let keys):
-        return "Policy missing access: \(keys.map(\.stringValue).joined(separator: ", "))"
+        return "Policy missing access: \(keys.map(\.rawValue).joined(separator: ", "))"
       }
     }
   }
@@ -85,9 +51,10 @@ struct Policy: Codable {
   func check(_ other: Self) throws {
     var errors: [CodingKeys] = []
 
-    if let requiredEvents = other.appleEvents {
+    // Check AppleEvents separately since it's an array
+    if let valueEvents = other.appleEvents {
       if let selfEvents = self.appleEvents {
-        if !Set(requiredEvents).isSubset(of: Set(selfEvents)) {
+        if !Set(valueEvents).isSubset(of: Set(selfEvents)) {
           errors.append(.appleEvents)
         }
       } else {
@@ -95,27 +62,56 @@ struct Policy: Codable {
       }
     }
 
-    let selfMirror = Mirror(reflecting: self)
-    let otherMirror = Mirror(reflecting: other)
+    if let value = other.addressBook, value != self.addressBook {
+      errors.append(.addressBook)
+    }
 
-    for otherChild in otherMirror.children {
-      guard let label = otherChild.label else {
-        fatalError("Unknown label")
-      }
-      guard let codingKey = CodingKeys.labelMap[label] else {
-        fatalError("Unknown label")
-      }
+    if let value = other.calendar, value != self.calendar {
+      errors.append(.calendar)
+    }
 
-      if codingKey == .appleEvents { continue }
+    if let value = other.mediaLibrary, value != self.mediaLibrary {
+      errors.append(.mediaLibrary)
+    }
 
-      guard let requiredValue = otherChild.value as? Bool? else { continue }
-      if requiredValue == nil { continue }
+    if let value = other.photos, value != self.photos {
+      errors.append(.photos)
+    }
 
-      let selfValue = selfMirror.children.first { $0.label == label }?.value as? Bool?
+    if let value = other.reminders, value != self.reminders {
+      errors.append(.reminders)
+    }
 
-      if requiredValue != selfValue {
-        errors.append(codingKey)
-      }
+    if let value = other.systemPolicyAllFiles, value != self.systemPolicyAllFiles {
+      errors.append(.systemPolicyAllFiles)
+    }
+
+    if let value = other.systemPolicyDesktopFolder, value != self.systemPolicyDesktopFolder {
+      errors.append(.systemPolicyDesktopFolder)
+    }
+
+    if let value = other.systemPolicyDeveloperFiles, value != self.systemPolicyDeveloperFiles {
+      errors.append(.systemPolicyDeveloperFiles)
+    }
+
+    if let value = other.systemPolicyDocumentsFolder,
+      value != self.systemPolicyDocumentsFolder
+    {
+      errors.append(.systemPolicyDocumentsFolder)
+    }
+
+    if let value = other.systemPolicyDownloadsFolder,
+      value != self.systemPolicyDownloadsFolder
+    {
+      errors.append(.systemPolicyDownloadsFolder)
+    }
+
+    if let value = other.systemPolicyiCloudDrive, value != self.systemPolicyiCloudDrive {
+      errors.append(.systemPolicyiCloudDrive)
+    }
+
+    if let value = other.systemPolicyNetworkVolumes, value != self.systemPolicyNetworkVolumes {
+      errors.append(.systemPolicyNetworkVolumes)
     }
 
     if !errors.isEmpty {

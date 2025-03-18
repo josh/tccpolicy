@@ -39,7 +39,7 @@ extension Policy {
     var authValue: TCCDb.AuthValue?
 
     // Calendars
-    authValue = await TCCDb.user.authValue(client: client, serviceKey: .calendar)
+    authValue = await TCCDb.user.authValue(client: client, service: .Calendar)
     if authValue == .allowed || authValue == .addOnly {
       self.calendar = true
     } else if authValue == .denied {
@@ -47,7 +47,7 @@ extension Policy {
     }
 
     // Contacts
-    authValue = await TCCDb.user.authValue(client: client, serviceKey: .addressBook)
+    authValue = await TCCDb.user.authValue(client: client, service: .AddressBook)
     if authValue == .allowed {
       self.addressBook = true
     } else if authValue == .denied {
@@ -57,7 +57,7 @@ extension Policy {
     // Files & Folders - Desktop Folder
     authValue = await TCCDb.user.authValue(
       client: client,
-      serviceKey: .systemPolicyDesktopFolder
+      service: .SystemPolicyDesktopFolder
     )
     if authValue == .allowed {
       self.systemPolicyDesktopFolder = true
@@ -68,7 +68,7 @@ extension Policy {
     // Files & Folders - Documents Folder
     authValue = await TCCDb.user.authValue(
       client: client,
-      serviceKey: .systemPolicyDocumentsFolder
+      service: .SystemPolicyDocumentsFolder
     )
     if authValue == .allowed {
       self.systemPolicyDocumentsFolder = true
@@ -79,7 +79,7 @@ extension Policy {
     // Files & Folders - Downloads Folder
     authValue = await TCCDb.user.authValue(
       client: client,
-      serviceKey: .systemPolicyDownloadsFolder
+      service: .SystemPolicyDownloadsFolder
     )
     if authValue == .allowed {
       self.systemPolicyDownloadsFolder = true
@@ -90,7 +90,7 @@ extension Policy {
     // Files & Folders - Network Volumes
     authValue = await TCCDb.user.authValue(
       client: client,
-      serviceKey: .systemPolicyNetworkVolumes
+      service: .SystemPolicyNetworkVolumes
     )
     if authValue == .allowed {
       self.systemPolicyNetworkVolumes = true
@@ -101,7 +101,7 @@ extension Policy {
     // Files & Folders - iCloud Drive
     authValue = await TCCDb.user.authValue(
       client: client,
-      service: "kTCCServiceFileProviderDomain",
+      service: .FileProviderDomain,
       identifierPrefix: "com.apple.CloudDocs.iCloudDriveFileProvider/"
     )
     if authValue == .allowed {
@@ -116,7 +116,7 @@ extension Policy {
     // Full Disk Access
     authValue = await TCCDb.system.authValue(
       client: client,
-      serviceKey: .systemPolicyAllFiles
+      service: .SystemPolicyAllFiles
     )
     if authValue == .allowed {
       self.systemPolicyAllFiles = true
@@ -125,7 +125,7 @@ extension Policy {
     }
 
     // Media & Apple Music
-    authValue = await TCCDb.user.authValue(client: client, serviceKey: .mediaLibrary)
+    authValue = await TCCDb.user.authValue(client: client, service: .MediaLibrary)
     if authValue == .allowed {
       self.mediaLibrary = true
     } else if authValue == .denied {
@@ -133,7 +133,7 @@ extension Policy {
     }
 
     // Photos
-    authValue = await TCCDb.user.authValue(client: client, serviceKey: .photos)
+    authValue = await TCCDb.user.authValue(client: client, service: .Photos)
     if authValue == .allowed {
       self.photos = true
     } else if authValue == .denied {
@@ -141,7 +141,7 @@ extension Policy {
     }
 
     // Reminders
-    authValue = await TCCDb.user.authValue(client: client, serviceKey: .reminders)
+    authValue = await TCCDb.user.authValue(client: client, service: .Reminders)
     if authValue == .allowed {
       self.reminders = true
     } else if authValue == .denied {
@@ -149,10 +149,7 @@ extension Policy {
     }
 
     // Automation
-    let appleEventIdentifiers = await TCCDb.user.identifiers(
-      client: client,
-      serviceKey: .appleEvents
-    )
+    let appleEventIdentifiers = await TCCDb.user.identifiers(client: client, service: .AppleEvents)
     if !appleEventIdentifiers.isEmpty {
       self.appleEvents = appleEventIdentifiers
     }

@@ -10,7 +10,7 @@ client="com.mitchellh.ghostty"
 policy_file="$(mktemp)"
 echo '{"Reminders": true}' >"$policy_file"
 
-echo "1..5"
+echo "1..6"
 
 if swift build >/dev/null 1>&2; then
   echo "ok 1 - swift build: pass"
