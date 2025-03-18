@@ -50,6 +50,12 @@ struct Policy: Codable {
       (dict, key) in
       dict[key.label] = key
     }
+
+    init?(label: String) {
+      let key = CodingKeys.labelMap[label]
+      guard let key else { return nil }
+      self = key
+    }
   }
 
   var isEmpty: Bool {

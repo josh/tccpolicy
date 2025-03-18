@@ -39,7 +39,7 @@ extension Policy {
     var authValue: TCCDb.AuthValue?
 
     // Calendars
-    authValue = await TCCDb.user.authValue(client: client, service: "kTCCServiceCalendar")
+    authValue = await TCCDb.user.authValue(client: client, serviceKey: .calendar)
     if authValue == .allowed || authValue == .addOnly {
       self.calendar = true
     } else if authValue == .denied {
@@ -47,7 +47,7 @@ extension Policy {
     }
 
     // Contacts
-    authValue = await TCCDb.user.authValue(client: client, service: "kTCCServiceAddressBook")
+    authValue = await TCCDb.user.authValue(client: client, serviceKey: .addressBook)
     if authValue == .allowed {
       self.addressBook = true
     } else if authValue == .denied {
@@ -56,7 +56,9 @@ extension Policy {
 
     // Files & Folders - Desktop Folder
     authValue = await TCCDb.user.authValue(
-      client: client, service: "kTCCServiceSystemPolicyDesktopFolder")
+      client: client,
+      serviceKey: .systemPolicyDesktopFolder
+    )
     if authValue == .allowed {
       self.systemPolicyDesktopFolder = true
     } else if authValue == .denied {
@@ -65,7 +67,9 @@ extension Policy {
 
     // Files & Folders - Documents Folder
     authValue = await TCCDb.user.authValue(
-      client: client, service: "kTCCServiceSystemPolicyDocumentsFolder")
+      client: client,
+      serviceKey: .systemPolicyDocumentsFolder
+    )
     if authValue == .allowed {
       self.systemPolicyDocumentsFolder = true
     } else if authValue == .denied {
@@ -74,7 +78,9 @@ extension Policy {
 
     // Files & Folders - Downloads Folder
     authValue = await TCCDb.user.authValue(
-      client: client, service: "kTCCServiceSystemPolicyDownloadsFolder")
+      client: client,
+      serviceKey: .systemPolicyDownloadsFolder
+    )
     if authValue == .allowed {
       self.systemPolicyDownloadsFolder = true
     } else if authValue == .denied {
@@ -83,7 +89,9 @@ extension Policy {
 
     // Files & Folders - Network Volumes
     authValue = await TCCDb.user.authValue(
-      client: client, service: "kTCCServiceSystemPolicyNetworkVolumes")
+      client: client,
+      serviceKey: .systemPolicyNetworkVolumes
+    )
     if authValue == .allowed {
       self.systemPolicyNetworkVolumes = true
     } else if authValue == .denied {
@@ -108,7 +116,7 @@ extension Policy {
     // Full Disk Access
     authValue = await TCCDb.system.authValue(
       client: client,
-      service: "kTCCServiceSystemPolicyAllFiles"
+      serviceKey: .systemPolicyAllFiles
     )
     if authValue == .allowed {
       self.systemPolicyAllFiles = true
@@ -117,7 +125,7 @@ extension Policy {
     }
 
     // Media & Apple Music
-    authValue = await TCCDb.user.authValue(client: client, service: "kTCCServiceMediaLibrary")
+    authValue = await TCCDb.user.authValue(client: client, serviceKey: .mediaLibrary)
     if authValue == .allowed {
       self.mediaLibrary = true
     } else if authValue == .denied {
@@ -125,7 +133,7 @@ extension Policy {
     }
 
     // Photos
-    authValue = await TCCDb.user.authValue(client: client, service: "kTCCServicePhotos")
+    authValue = await TCCDb.user.authValue(client: client, serviceKey: .photos)
     if authValue == .allowed {
       self.photos = true
     } else if authValue == .denied {
@@ -133,7 +141,7 @@ extension Policy {
     }
 
     // Reminders
-    authValue = await TCCDb.user.authValue(client: client, service: "kTCCServiceReminders")
+    authValue = await TCCDb.user.authValue(client: client, serviceKey: .reminders)
     if authValue == .allowed {
       self.reminders = true
     } else if authValue == .denied {
@@ -142,7 +150,9 @@ extension Policy {
 
     // Automation
     let appleEventIdentifiers = await TCCDb.user.identifiers(
-      client: client, service: "kTCCServiceAppleEvents")
+      client: client,
+      serviceKey: .appleEvents
+    )
     if !appleEventIdentifiers.isEmpty {
       self.appleEvents = appleEventIdentifiers
     }

@@ -209,11 +209,19 @@ actor TCCDb {
     return AuthValue(rawValue: authValue)
   }
 
+  func authValue(client: String, serviceKey: Policy.CodingKeys) -> AuthValue? {
+    return authValue(client: client, service: serviceKey.service)
+  }
+
   func identifiers(client: String, service: String) -> [String] {
     let sql = """
         SELECT indirect_object_identifier FROM access WHERE client = '\(client)' AND service = '\(service)';
       """
     return query(sql: sql).map { $0["indirect_object_identifier"] as? String ?? "" }
+  }
+
+  func identifiers(client: String, serviceKey: Policy.CodingKeys) -> [String] {
+    return identifiers(client: client, service: serviceKey.service)
   }
 
   func reset(client: String, service: String? = nil) throws -> Int32 {
@@ -228,5 +236,29 @@ actor TCCDb {
         """
     }
     return try execute(sql: sql)
+  }
+
+  func reset(client: String, serviceKey: Policy.CodingKeys?) throws -> Int32 {
+    return try reset(client: client, service: serviceKey?.service)
+  }
+}
+
+extension Policy.CodingKeys {
+  var service: String {
+    switch self {
+    case .addressBook: return "kTCCServiceAddressBook"
+    case .calendar: return "kTCCServiceCalendar"
+    case .mediaLibrary: return "kTCCServiceMediaLibrary"
+    case .photos: return "kTCCServicePhotos"
+    case .reminders: return "kTCCServiceReminders"
+    case .systemPolicyAllFiles: return "kTCCServiceSystemPolicyAllFiles"
+    case .systemPolicyDesktopFolder: return "kTCCServiceSystemPolicyDesktopFolder"
+    case .systemPolicyDeveloperFiles: return "kTCCServiceSystemPolicyDeveloperFiles"
+    case .systemPolicyDocumentsFolder: return "kTCCServiceSystemPolicyDocumentsFolder"
+    case .systemPolicyDownloadsFolder: return "kTCCServiceSystemPolicyDownloadsFolder"
+    case .systemPolicyiCloudDrive: fatalError("special case")
+    case .systemPolicyNetworkVolumes: return "kTCCServiceSystemPolicyNetworkVolumes"
+    case .appleEvents: return "kTCCServiceAppleEvents"
+    }
   }
 }
