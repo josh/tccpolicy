@@ -27,7 +27,7 @@ else
   echo "not ok 2 - tccpolicy dump: dirty"
 fi
 
-if $tccpolicy request --client "$client" --policy "$policy_file" 1>&2; then
+if $tccpolicy request --policy "$policy_file" 1>&2; then
   echo "ok 3 - tccpolicy request: pass"
 else
   echo "not ok 3 - tccpolicy request: fail"
