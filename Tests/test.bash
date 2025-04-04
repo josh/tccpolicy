@@ -4,9 +4,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-# client="/bin/date"
-# TODO: Add stub program to use as test client
-client="com.mitchellh.ghostty"
 policy_file="$(mktemp)"
 echo '{"Reminders": true}' >"$policy_file"
 
@@ -19,7 +16,8 @@ else
   exit 1
 fi
 
-tccpolicy=".build/arm64-apple-macosx/debug/tccpolicy"
+tccpolicy="$PWD/.build/arm64-apple-macosx/debug/tccpolicy"
+client="$tccpolicy"
 
 if $tccpolicy dump --client "$client" | jq --exit-status 'has("Reminders") == false' 1>/dev/null; then
   echo "ok 2 - tccpolicy dump: clean"
@@ -27,7 +25,7 @@ else
   echo "not ok 2 - tccpolicy dump: dirty"
 fi
 
-if $tccpolicy request --policy "$policy_file" 1>&2; then
+if $tccpolicy spawn -- "$tccpolicy" request --policy "$policy_file" 1>&2; then
   echo "ok 3 - tccpolicy request: pass"
 else
   echo "not ok 3 - tccpolicy request: fail"
