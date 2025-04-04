@@ -8,6 +8,7 @@ let commands: [String: any Command] = [
   "help": HelpCommand(),
   "request": RequestCommand(),
   "reset": ResetCommand(),
+  "spawn": SpawnCommand(),
 ]
 
 @main
@@ -407,5 +408,40 @@ struct ResetCommand: Command {
     }
 
     try await Policy.reset(client: client, service: service)
+  }
+}
+
+struct SpawnCommand: Command {
+  var abstract: String = "Spawn a process with the responsibility disclaimed"
+
+  func printHelp() {
+    print(
+      """
+      OVERVIEW: \(abstract)
+
+      USAGE: tccpolicy spawn [--] <program> [arguments...]
+
+      OPTIONS:
+        <program>       The program to execute
+        [arguments...]  Optional arguments to pass to the program
+      """)
+  }
+
+  func run(_ args: [String]) async throws {
+    var stderr = StandardErrorStream()
+
+    var arguments = args
+    if arguments.count > 0 && arguments[0] == "--" {
+      arguments.removeFirst()
+    }
+
+    guard !arguments.isEmpty else {
+      print("error: No program specified to spawn", to: &stderr)
+      printHelp()
+      exit(1)
+    }
+
+    let status = try await spawnWithDisclaim(arguments)
+    exit(status)
   }
 }

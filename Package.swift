@@ -8,6 +8,10 @@ let package = Package(
     .macOS(.v13)
   ],
   targets: [
-    .executableTarget(name: "tccpolicy")
+    .target(name: "PosixSpawnResponsible"),
+    .executableTarget(
+      name: "tccpolicy",
+      dependencies: ["PosixSpawnResponsible"]
+    ),
   ]
 )
