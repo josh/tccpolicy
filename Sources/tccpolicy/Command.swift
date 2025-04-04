@@ -64,7 +64,7 @@ struct HelpCommand: Command {
       """
       OVERVIEW: manage policy for client in TCC privacy database
 
-      USAGE: tcc-policy <subcommand>
+      USAGE: tccpolicy <subcommand>
 
       OPTIONS:
         -V, --version           Show the version.
@@ -82,7 +82,7 @@ struct HelpCommand: Command {
     print(
       """
 
-        See 'tcc-policy help <subcommand>' for detailed help.
+        See 'tccpolicy help <subcommand>' for detailed help.
       """)
   }
 
@@ -109,7 +109,7 @@ struct DumpCommand: Command {
       """
       OVERVIEW: \(abstract)
 
-      USAGE: tcc-policy dump [--client <client>] [--output <output>]
+      USAGE: tccpolicy dump [--client <client>] [--output <output>]
 
       OPTIONS:
         --client <client>       Bundle identifier or executable path
@@ -190,7 +190,7 @@ struct CheckCommand: Command {
       """
       OVERVIEW: \(abstract)
 
-      USAGE: tcc-policy check [--client <client>] --policy <policy>
+      USAGE: tccpolicy check [--client <client>] --policy <policy>
 
       OPTIONS:
         --client <client>       Bundle identifier or executable path
@@ -292,7 +292,7 @@ struct RequestCommand: Command {
       """
       OVERVIEW: \(abstract)
 
-      USAGE: tcc-policy request --policy <policy>
+      USAGE: tccpolicy request --policy <policy>
 
       OPTIONS:
         -p, --policy <policy>
@@ -354,7 +354,7 @@ struct ResetCommand: Command {
       """
       OVERVIEW: \(abstract)
 
-      USAGE: tcc-policy reset --client <client> [--service <service>]
+      USAGE: tccpolicy reset --client <client> [--service <service>]
 
       OPTIONS:
         --client <client>       Bundle identifier or executable path
