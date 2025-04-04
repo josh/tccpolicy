@@ -1,8 +1,9 @@
 import Darwin.C
 import Foundation
-import PosixSpawnResponsible
 
 enum SpawnError: Error {
+  case disclaimUnavailable
+  case disclaimFailed
   case spawnFailed(code: Int32, description: String)
   case waitFailed(code: Int32)
 }
@@ -26,17 +27,18 @@ func spawnWithDisclaim(_ args: [String]) async throws -> Int32 {
   posix_spawnattr_init(&attr)
   defer { posix_spawnattr_destroy(&attr) }
 
-  let disclaimResult = responsibility_spawnattrs_setdisclaim(&attr, true)
-  if disclaimResult != 0 {
-    throw SpawnError.spawnFailed(
-      code: disclaimResult,
-      description: "Failed to set disclaim attribute"
-    )
+  guard let responsibility_spawnattrs_setdisclaim else {
+    throw SpawnError.disclaimUnavailable
+  }
+
+  guard responsibility_spawnattrs_setdisclaim(&attr, true) == 0 else {
+    throw SpawnError.disclaimFailed
   }
 
   var pid = pid_t()
   let rv = posix_spawnp(&pid, argv[0], &fileActions, &attr, argv + [nil], env + [nil])
-  if rv != 0 {
+
+  guard rv == 0 else {
     throw SpawnError.spawnFailed(
       code: rv,
       description: String(cString: strerror(rv))
@@ -62,3 +64,17 @@ func spawnWithDisclaim(_ args: [String]) async throws -> Int32 {
 
   return status
 }
+
+typealias ResponsibilitySpawnattrsSetDisclaimFunction = @convention(c) (
+  UnsafeMutablePointer<posix_spawnattr_t?>, Bool
+) -> Int32
+
+var responsibility_spawnattrs_setdisclaim: ResponsibilitySpawnattrsSetDisclaimFunction? = {
+  guard let handle = dlopen(nil, RTLD_LAZY) else {
+    return nil
+  }
+  guard let symbolPointer = dlsym(handle, "responsibility_spawnattrs_setdisclaim") else {
+    return nil
+  }
+  return unsafeBitCast(symbolPointer, to: ResponsibilitySpawnattrsSetDisclaimFunction.self)
+}()

@@ -1,4 +1,0 @@
-module PosixSpawnResponsible {
-    header "PosixSpawnResponsible.h"
-    export *
-}
