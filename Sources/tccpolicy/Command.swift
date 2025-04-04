@@ -17,6 +17,7 @@ struct TccPolicy {
   }
 
   func run(_ args: [String]) async throws {
+    var stderr = StandardErrorStream()
     let helpCommand = HelpCommand()
 
     if args.count <= 1 {
@@ -43,7 +44,7 @@ struct TccPolicy {
       }
       try await command.run(commandArgs)
     } else {
-      print("Unknown subcommand: \(subcommand)")
+      print("error: unknown subcommand: \(subcommand)", to: &stderr)
       helpCommand.printHelp()
     }
   }
@@ -86,11 +87,12 @@ struct HelpCommand: Command {
   }
 
   func run(_ args: [String]) async throws {
+    var stderr = StandardErrorStream()
     if args.count > 0 {
       if let command = commands[args[0]] {
         command.printHelp()
       } else {
-        print("Unknown subcommand: \(args[2])")
+        print("error: unknown subcommand: \(args[0])", to: &stderr)
         printHelp()
       }
     } else {
@@ -117,6 +119,8 @@ struct DumpCommand: Command {
   }
 
   func run(_ args: [String]) async throws {
+    var stderr = StandardErrorStream()
+
     var client: String? = nil
     var outputFile: String? = nil
 
@@ -128,7 +132,7 @@ struct DumpCommand: Command {
           client = args[i + 1]
           i += 2
         } else {
-          print("error: missing value for '--client'")
+          print("error: missing value for '--client'", to: &stderr)
           return
         }
       case "--output", "-o":
@@ -136,11 +140,11 @@ struct DumpCommand: Command {
           outputFile = args[i + 1]
           i += 2
         } else {
-          print("error: missing value for '--output'")
+          print("error: missing value for '--output'", to: &stderr)
           return
         }
       default:
-        print("error: unknown option '\(args[i])'")
+        print("error: unknown option '\(args[i])'", to: &stderr)
         return
       }
     }
@@ -196,6 +200,8 @@ struct CheckCommand: Command {
   }
 
   func run(_ args: [String]) async throws {
+    var stderr = StandardErrorStream()
+
     var client: String? = nil
     var policyFile: String? = nil
 
@@ -207,7 +213,7 @@ struct CheckCommand: Command {
           client = args[i + 1]
           i += 2
         } else {
-          print("error: missing value for '--client'")
+          print("error: missing value for '--client'", to: &stderr)
           return
         }
       case "--policy", "-p":
@@ -215,11 +221,11 @@ struct CheckCommand: Command {
           policyFile = args[i + 1]
           i += 2
         } else {
-          print("error: missing value for '--policy'")
+          print("error: missing value for '--policy'", to: &stderr)
           return
         }
       default:
-        print("error: unknown option '\(args[i])'")
+        print("error: unknown option '\(args[i])'", to: &stderr)
         return
       }
     }
@@ -227,8 +233,6 @@ struct CheckCommand: Command {
     guard let policyFile = policyFile else {
       throw Error.missingRequiredOption("--policy")
     }
-
-    var stderr = StandardErrorStream()
 
     let data = try Data(contentsOf: URL(fileURLWithPath: policyFile))
 
@@ -297,6 +301,8 @@ struct RequestCommand: Command {
   }
 
   func run(_ args: [String]) async throws {
+    var stderr = StandardErrorStream()
+
     var policyFile: String? = nil
 
     var i = 0
@@ -307,11 +313,11 @@ struct RequestCommand: Command {
           policyFile = args[i + 1]
           i += 2
         } else {
-          print("error: missing value for '--policy'")
+          print("error: missing value for '--policy'", to: &stderr)
           return
         }
       default:
-        print("error: unknown option '\(args[i])'")
+        print("error: unknown option '\(args[i])'", to: &stderr)
         return
       }
     }
@@ -358,6 +364,8 @@ struct ResetCommand: Command {
   }
 
   func run(_ args: [String]) async throws {
+    var stderr = StandardErrorStream()
+
     var client: String? = nil
     var serviceString: String? = nil
 
@@ -369,7 +377,7 @@ struct ResetCommand: Command {
           client = args[i + 1]
           i += 2
         } else {
-          print("error: missing value for '--client'")
+          print("error: missing value for '--client'", to: &stderr)
           return
         }
       case "--service", "-s":
@@ -377,11 +385,11 @@ struct ResetCommand: Command {
           serviceString = args[i + 1]
           i += 2
         } else {
-          print("error: missing value for '--service'")
+          print("error: missing value for '--service'", to: &stderr)
           return
         }
       default:
-        print("error: unknown option '\(args[i])'")
+        print("error: unknown option '\(args[i])'", to: &stderr)
         return
       }
     }
