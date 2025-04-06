@@ -13,8 +13,14 @@ let commands: [String: any Command] = [
 
 @main
 struct TccPolicy {
-  static func main() async throws {
-    try await TccPolicy().run(CommandLine.arguments)
+  static func main() async {
+    do {
+      try await TccPolicy().run(CommandLine.arguments)
+    } catch {
+      var stderr = StandardErrorStream()
+      print("\(error)", to: &stderr)
+      exit(1)
+    }
   }
 
   func run(_ args: [String]) async throws {
