@@ -12,7 +12,7 @@ extension Policy {
       var policy = Policy()
       try await policy.load(client: client)
       if !policy.isEmpty {
-        policies[client] = policy
+        policies[client.description] = policy
       }
     }
 
@@ -22,7 +22,7 @@ extension Policy {
     return policies
   }
 
-  static func dump(client: String) async throws -> Policy {
+  static func dump(client: Client) async throws -> Policy {
     try await TCCDb.user.open()
     try await TCCDb.system.open()
 
@@ -35,7 +35,7 @@ extension Policy {
     return policy
   }
 
-  mutating func load(client: String) async throws {
+  mutating func load(client: Client) async throws {
     var authValue: TCCDb.AuthValue?
 
     // Calendars

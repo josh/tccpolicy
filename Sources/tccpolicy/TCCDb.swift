@@ -172,27 +172,36 @@ actor TCCDb {
     return sqlite3_changes(db)
   }
 
-  func clients() throws -> [String] {
-    return query(sql: "SELECT DISTINCT client FROM access").map { $0["client"] as? String ?? "" }
+  func clients() throws -> [Client] {
+    var clients: [Client] = []
+    for row in query(sql: "SELECT DISTINCT client FROM access") {
+      guard let value = row["client"] as? String else {
+        assertionFailure("Could not cast client to String")
+        continue
+      }
+      clients.append(Client(value))
+    }
+    return clients
   }
 
   enum AuthValue: Int64 {
+    case invalid = -1
     case denied = 0
     case unknown = 1
     case allowed = 2
     case addOnly = 4
   }
 
-  func authValue(client: String, service: Service, identifierPrefix: String? = nil) -> AuthValue? {
+  func authValue(client: Client, service: Service, identifierPrefix: String? = nil) -> AuthValue? {
     let sql: String
 
     if let identifierPrefix {
       sql = """
-          SELECT auth_value FROM access WHERE client = '\(client)' AND service = '\(service.tccServiceConstant)' AND indirect_object_identifier LIKE '\(identifierPrefix)%';
+          SELECT auth_value, csreq FROM access WHERE client = '\(client)' AND service = '\(service.tccServiceConstant)' AND indirect_object_identifier LIKE '\(identifierPrefix)%';
         """
     } else {
       sql = """
-          SELECT auth_value FROM access WHERE client = '\(client)' AND service = '\(service.tccServiceConstant)';
+          SELECT auth_value, csreq FROM access WHERE client = '\(client)' AND service = '\(service.tccServiceConstant)';
         """
     }
 
@@ -206,10 +215,19 @@ actor TCCDb {
       return nil
     }
 
+    guard let csreq = row["csreq"] as? Data else {
+      assertionFailure("Could not cast csreq to Data")
+      return nil
+    }
+
+    guard client.checkValidity(requirement: csreq) else {
+      return .invalid
+    }
+
     return AuthValue(rawValue: authValue)
   }
 
-  func identifiers(client: String, service: Service) -> [String] {
+  func identifiers(client: Client, service: Service) -> [String] {
     let sql = """
         SELECT indirect_object_identifier FROM access WHERE client = '\(client)' AND service = '\(service.tccServiceConstant)';
       """

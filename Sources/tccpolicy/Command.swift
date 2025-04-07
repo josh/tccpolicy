@@ -161,7 +161,7 @@ struct DumpCommand: Command {
 
     let data: Data
     if let client {
-      data = try await encoder.encode(Policy.dump(client: client))
+      data = try await encoder.encode(Policy.dump(client: Client(client)))
     } else {
       data = try await encoder.encode(Policy.dump())
     }
@@ -245,7 +245,7 @@ struct CheckCommand: Command {
 
     if let client {
       let requiredPolicy = try JSONDecoder().decode(Policy.self, from: data)
-      let policy = try await Policy.dump(client: client)
+      let policy = try await Policy.dump(client: Client(client))
 
       do {
         try policy.check(requiredPolicy)
