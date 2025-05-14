@@ -157,7 +157,7 @@ struct DumpCommand: Command {
     }
 
     let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted]
+    encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
 
     let data: Data
     if let client {
