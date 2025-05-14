@@ -14,4 +14,16 @@ extension Policy {
     }
     await TCCDb.user.close()
   }
+
+  static func clean() async throws {
+    var stderr = StandardErrorStream()
+    try await TCCDb.user.open(readonly: false)
+
+    let rowsChanged = try await TCCDb.user.clean()
+    if rowsChanged > 0 {
+      print("Removed \(rowsChanged) invalid rows", to: &stderr)
+    }
+
+    await TCCDb.user.close()
+  }
 }

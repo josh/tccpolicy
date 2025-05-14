@@ -4,6 +4,7 @@ let version = "0.1.0"
 
 let commands: [String: any Command] = [
   "check": CheckCommand(),
+  "clean": CleanCommand(),
   "dump": DumpCommand(),
   "help": HelpCommand(),
   "request": RequestCommand(),
@@ -411,6 +412,24 @@ struct ResetCommand: Command {
     }
 
     try await Policy.reset(client: client, service: service)
+  }
+}
+
+struct CleanCommand: Command {
+  var abstract: String = "Remove TCC db entries that no longer valid"
+
+  func printHelp() {
+    print(
+      """
+      OVERVIEW: Remove TCC db entries that no longer valid
+
+      USAGE: tccpolicy clean
+      """
+    )
+  }
+
+  func run(_ args: [String]) async throws {
+    try await Policy.clean()
   }
 }
 

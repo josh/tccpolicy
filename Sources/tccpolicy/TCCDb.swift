@@ -247,4 +247,44 @@ actor TCCDb {
     }
     return try execute(sql: sql)
   }
+
+  func clean() throws -> Int32 {
+    let querySql = """
+      SELECT rowid, client, csreq FROM access WHERE csreq IS NOT NULL;
+      """
+
+    var rowIds: [Int64] = []
+
+    for row in query(sql: querySql) {
+      guard let rowId = row["rowid"] as? Int64 else {
+        assertionFailure("Could not cast rowid to Int64")
+        continue
+      }
+
+      guard let clientStr = row["client"] as? String else {
+        assertionFailure("Could not cast client to String")
+        continue
+      }
+      let client = Client(clientStr)
+
+      guard let csreq = row["csreq"] as? Data else {
+        assertionFailure("Could not cast csreq to Data")
+        continue
+      }
+
+      if client.checkValidity(requirement: csreq) == false {
+        print("warn: \(client) is invalid")
+        rowIds.append(rowId)
+      }
+    }
+
+    guard !rowIds.isEmpty else {
+      return 0
+    }
+
+    let deleteSql = """
+      DELETE FROM access WHERE rowid IN (\(rowIds.map { "\($0)" }.joined(separator: ", ")));
+      """
+    return try execute(sql: deleteSql)
+  }
 }
