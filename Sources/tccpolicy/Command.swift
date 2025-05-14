@@ -241,10 +241,8 @@ struct CheckCommand: Command {
       throw Error.missingRequiredOption("--policy")
     }
 
-    let data = try Data(contentsOf: URL(fileURLWithPath: policyFile))
-
     if let client {
-      let requiredPolicy = try JSONDecoder().decode(Policy.self, from: data)
+      let requiredPolicy = try Policy.read(atPath: policyFile)
       let policy = try await Policy.dump(client: Client(client))
 
       do {
@@ -254,7 +252,7 @@ struct CheckCommand: Command {
         throw Error.checkFailed
       }
     } else {
-      let requiredPolicies = try JSONDecoder().decode([String: Policy].self, from: data)
+      let requiredPolicies = try Policy.readAll(atPath: policyFile)
       let policies = try await Policy.dump()
       var failed = false
 
@@ -333,8 +331,7 @@ struct RequestCommand: Command {
       throw Error.missingRequiredOption("--policy")
     }
 
-    let data = try Data(contentsOf: URL(fileURLWithPath: policyFile))
-    let policy = try JSONDecoder().decode(Policy.self, from: data)
+    let policy = try Policy.read(atPath: policyFile)
     try await policy.request()
   }
 }
