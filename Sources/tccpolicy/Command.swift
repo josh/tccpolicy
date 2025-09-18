@@ -1,6 +1,6 @@
 import Foundation
 
-let version = "0.1.0"
+let version = "0.1.1"
 
 let commands: [String: any Command] = [
   "check": CheckCommand(),
